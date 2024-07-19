@@ -50,3 +50,9 @@ USED_AFTER="$(df -k / | awk 'NR>1 {print $3}')"
 # Summary
 echo -e "${YELLOW_COLOR}Freed up space: $(( (USED_BEFORE - USED_AFTER)/1024 )) MB${OFF_COLOR}"
 exit "${STATUS_OK}"
+
+
+# Save the above code in a file, for example snap-cleanup.sh
+# Put it in a folder defined in $PATH, for example $HOME/.local/bin
+# Make it executable by chmod +x $HOME/.local/bin/snap-cleanup.sh
+# Call it by sudo bash $HOME/.local/bin/snap-cleanup.sh
