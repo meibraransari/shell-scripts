@@ -1,0 +1,13 @@
+[Unit]
+Description=ec2-auto-shutdown
+
+[Service]
+ExecStart=/opt/ec2-auto-shutdown/ec2-auto-shutdown
+Restart=always
+User=root
+Group=root
+Environment=PATH=/usr/bin:/usr/local/bin
+WorkingDirectory=/opt/ec2-auto-shutdown
+
+[Install]
+WantedBy=multi-user.target

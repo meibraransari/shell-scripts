@@ -1,0 +1,38 @@
+#!/bin/bash
+PATH=/usr/local/cuda/bin:/opt/anaconda3/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root" 
+  exit 1
+fi
+
+source /etc/ec2-auto-shutdown/ec2-auto-shutdown-config
+shutdown_after=`expr $shutdown_idle_minutes \* 60`
+ssh_max_idle_time=1
+last_activity=`date +%s`
+while true
+do
+  users_connected=`who -s | wc -l`
+  average_load=`uptime | sed 's/.*load average: //' | awk -F\, '{print $1 }'`
+  idle=`echo $average_load'<'$avg_load_threshold | bc -l`
+
+  if [ "$users_connected" -gt "0" ]; then
+
+
+    shortest_idle=`who -s | awk '{ print $2 }' | (cd /dev && xargs stat -c '%n %U %X') | awk '{ print $1"\t"$2"\t"'"$(date +%s)"'-$3 }' | awk '{ print $3 }' | sort -n | head -1`
+    if [ "$shortest_idle" -lt "$ssh_max_idle_time" ]; then
+      last_activity=`date +%s`
+    fi
+  fi
+
+  now=`date +%s`
+  since_last_activity=`expr $now - $last_activity`
+  echo "${since_last_activity}s since last activity with ${users_connected} users connected"
+  if [ "$since_last_activity" -gt "$shutdown_after" ]; then
+    if [ "$users_connected" -lt "1" ]; then
+      echo "shutting down!"
+      sudo shutdown now "Shutting down due to inactivityyyyyy"
+      sleep 60
+    fi
+  fi
+  sleep 1
+done
